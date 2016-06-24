@@ -1,6 +1,6 @@
 kubernetes:
   src-repo: https://github.com/kubernetes/kubernetes
-  dst-repo: ssh://192.168.122.15:29418/kubernetes/kubernetes
+  dst-repo: ssh://admin@192.168.122.15:29418/kubernetes/kubernetes
   branches:
      - name: master
      - name: release-1.3
@@ -11,19 +11,19 @@ kubernetes:
 
 kubernetes-dashboard:
   src-repo: https://github.com/kubernetes/dashboard
-  dst-repo: ssh://192.168.122.15:29418/kubernetes/dashboard
+  dst-repo: ssh://admin@192.168.122.15:29418/kubernetes/dashboard
   branches:
      - name: master
 
 kubernetes-features:
   src-repo: https://github.com/kubernetes/features
-  dst-repo: ssh://192.168.122.15:29418/kubernetes/features
+  dst-repo: ssh://admin@192.168.122.15:29418/kubernetes/features
   branches:
      - name: master
 
 kubernetes-helm:
   src-repo: https://github.com/kubernetes/helm
-  dst-repo: ssh://192.168.122.15:29418/kubernetes/helm
+  dst-repo: ssh://admin@192.168.122.15:29418/kubernetes/helm
   branches:
      - name: master
      - name: release-v1.2.1
