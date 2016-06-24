@@ -8,6 +8,8 @@ from os import path
 
 import git
 import yaml
+from yamllint import linter
+from yamllint.config import YamlLintConfig
 
 
 class Project(object):
@@ -85,6 +87,12 @@ if __name__ == "__main__":
                         format="%(asctime)s  %(levelname)8s  %(message)s")
     if logging.getLogger().getEffectiveLevel() <= logging.DEBUG:
         git.cmd.Git.GIT_PYTHON_TRACE = True
+
+    conf = YamlLintConfig('extends: default')
+    for problem in linter.run(open(args.mapping), conf):
+        logging.error("%s", problem)
+        if problem.level == 'error':
+            sys.exit(2)
 
     mapping = yaml.safe_load(open(args.mapping))
     ec = 0
