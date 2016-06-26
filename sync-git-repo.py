@@ -30,13 +30,12 @@ class Project(object):
             self.push_branch(branch)
 
     def get_src_repo(self):
-        # Clone or update "src" repository
+        # Clone or update cached repository
         try:
             self.repo = git.Repo(self.cache_dir)
             self.repo.git.reset('--hard')
             self.repo.git.clean('-xdfq')
-            for remote in self.repo.remotes:
-                remote.update()
+            self.repo.remote("origin").update()
 
         except git.exc.NoSuchPathError as e:
             logging.info(e)
