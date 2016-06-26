@@ -4,6 +4,7 @@ import argparse
 import logging
 import os
 import sys
+import urlparse
 from os import path
 
 import git
@@ -29,12 +30,13 @@ class Project(object):
             self.push_branch(branch)
 
     def get_src_repo(self):
-        # Clone or update cached "src" repository
+        # Clone or update "src" repository
         try:
             self.repo = git.Repo(self.cache_dir)
             self.repo.git.reset('--hard')
             self.repo.git.clean('-xdfq')
-            self.repo.remote("origin").update()
+            for remote in self.repo.remotes:
+                remote.update()
 
         except git.exc.NoSuchPathError as e:
             logging.info(e)
@@ -43,7 +45,14 @@ class Project(object):
 
     def setup_dst_repo(self):
         # Add "dst" repository as remote
-        dst_repo = self.config["dst-repo"]
+        if self.config["dst-repo"].startswith("ssh://"):
+            dst_repo_list = list(urlparse.urlsplit(self.config["dst-repo"]))
+            username = os.getenv("GIT_PUSH_USERNAME", "admin")
+            dst_repo_list[1] = username + "@" + dst_repo_list[1]
+            dst_repo = urlparse.urlunsplit(dst_repo_list)
+        else:
+            dst_repo = self.config["dst-repo"]
+
         try:
             self.repo.delete_remote("dst")
         except git.exc.GitCommandError as e:
