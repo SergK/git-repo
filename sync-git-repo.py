@@ -1,15 +1,15 @@
 #! /usr/bin/env python2
 
 import argparse
+import git
 import jsonschema
 import logging
 import os
 import sys
 import urlparse
-from os import path
-
-import git
 import yaml
+
+from os import path
 
 
 class BaseSchema(object):
@@ -152,7 +152,8 @@ if __name__ == "__main__":
         try:
             Project(project['project'], project).sync(force=args.force)
         except Exception as e:
-            logging.error("Unable to sync `%s`: %s", project['project'], str(e))
+            logging.error("Unable to sync `%s`: %s",
+                          project['project'], str(e))
             ec = 1
     logging.info("Finished")
     sys.exit(ec)
