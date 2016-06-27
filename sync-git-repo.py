@@ -1,6 +1,7 @@
 #! /usr/bin/env python2
 
 import argparse
+import jsonschema
 import logging
 import os
 import sys
@@ -9,8 +10,54 @@ from os import path
 
 import git
 import yaml
-from yamllint import linter
-from yamllint.config import YamlLintConfig
+
+
+class BaseSchema(object):
+
+    @property
+    def metadata_schema(self):
+        return {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "branches": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "dst-repo": {
+                        "type": "string"
+                    },
+                    "project": {
+                        "type": "string"
+                    },
+                    "src-repo": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "branches",
+                    "dst-repo",
+                    "project",
+                    "src-repo"
+                ]
+            }
+        }
+
+
+class BaseValidator(object):
+
+    @classmethod
+    def validate_schema(cls, data, schema, file_path):
+        logging.debug(
+            'Start schema validation for %s file, %s', file_path, schema)
+        try:
+            jsonschema.validate(data, schema)
+        except jsonschema.exceptions.ValidationError as exc:
+            raise exc
 
 
 class Project(object):
@@ -24,12 +71,12 @@ class Project(object):
     def sync(self, force=False):
         self._force = force
         logging.info("Synchronizing `%s`", self.name)
-        self.get_src_repo()
-        self.setup_dst_repo()
+        self._get_src_repo()
+        self._setup_dst_repo()
         for branch in self.config["branches"]:
-            self.push_branch(branch)
+            self._push_branch(branch)
 
-    def get_src_repo(self):
+    def _get_src_repo(self):
         # Clone or update cached repository
         try:
             self.repo = git.Repo(self.cache_dir)
@@ -42,7 +89,7 @@ class Project(object):
             self.repo = git.Repo.clone_from(self.config["src-repo"],
                                             self.cache_dir)
 
-    def setup_dst_repo(self):
+    def _setup_dst_repo(self):
         # Add "dst" repository as remote
         if self.config["dst-repo"].startswith("ssh://"):
             dst_repo_list = list(urlparse.urlsplit(self.config["dst-repo"]))
@@ -59,11 +106,11 @@ class Project(object):
 
         self.repo.create_remote("dst", dst_repo)
 
-    def push_branch(self, branch):
+    def _push_branch(self, branch):
         push_infos = self.repo.remote("dst").push(
-            "refs/remotes/origin/" + branch['name'] +
+            "refs/remotes/origin/" + branch +
             ":" +
-            "refs/heads/" + branch['name'],
+            "refs/heads/" + branch,
             force=self._force
         )
         # Check for errors
@@ -85,10 +132,8 @@ if __name__ == "__main__":
     parser.add_argument("-f", "--force", action="store_true",
                         help="force push")
     parser.add_argument("-m", "--mapping", metavar="FILE",
-                        default="sync-git-repos.yaml",
+                        default="projects.yaml",
                         help="path to mapping file (default: %(default)s)")
-    parser.add_argument("-p", "--project", metavar="PROJECT", dest="projects",
-                        action="append", help="project to sync")
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.DEBUG,
@@ -96,21 +141,18 @@ if __name__ == "__main__":
     if logging.getLogger().getEffectiveLevel() <= logging.DEBUG:
         git.cmd.Git.GIT_PYTHON_TRACE = True
 
-    conf = YamlLintConfig('extends: default')
-    for problem in linter.run(open(args.mapping), conf):
-        logging.error("%s", problem)
-        if problem.level == 'error':
-            sys.exit(2)
-
+    schema = BaseSchema()
     mapping = yaml.safe_load(open(args.mapping))
+    BaseValidator.validate_schema(mapping,
+                                  schema.metadata_schema,
+                                  args.mapping)
     ec = 0
     logging.info("Started")
-    projects = args.projects if args.projects else mapping.keys()
-    for project in projects:
+    for project in mapping:
         try:
-            Project(project, mapping[project]).sync(force=args.force)
+            Project(project['project'], project).sync(force=args.force)
         except Exception as e:
-            logging.error("Unable to sync `%s`: %s", project, str(e))
+            logging.error("Unable to sync `%s`: %s", project['project'], str(e))
             ec = 1
     logging.info("Finished")
     sys.exit(ec)
