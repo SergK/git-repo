@@ -2,12 +2,7 @@
   src-repo: https://github.com/kubernetes/kubernetes
   dst-repo: ssh://192.168.122.15:29418/kubernetes/kubernetes
   branches:
-    - master
-    - release-1.3
-    - release-1.2
-    - release-1.1
-    - release-1.0
-    - release-0.21
+    - "*"
 
 - project: kubernetes-dashboard
   src-repo: https://github.com/kubernetes/dashboard

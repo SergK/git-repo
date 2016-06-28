@@ -20,7 +20,7 @@ import logging
 
 import git
 import os
-import urlparse
+import six
 
 
 class Project(object):
@@ -55,10 +55,12 @@ class Project(object):
     def _setup_dst_repo(self):
         # Add "dst" repository as remote
         if self.config["dst-repo"].startswith("ssh://"):
-            dst_repo_list = list(urlparse.urlsplit(self.config["dst-repo"]))
+            dst_repo_list = list(
+                six.moves.urllib.parse.urlsplit(self.config["dst-repo"])
+            )
             username = os.getenv("GIT_PUSH_USERNAME", "admin")
             dst_repo_list[1] = username + "@" + dst_repo_list[1]
-            dst_repo = urlparse.urlunsplit(dst_repo_list)
+            dst_repo = six.moves.urllib.parse.urlunsplit(dst_repo_list)
         else:
             dst_repo = self.config["dst-repo"]
 
