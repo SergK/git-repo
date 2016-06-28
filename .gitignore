@@ -1,1 +1,12 @@
+*.pyc
+
+build
+dist
+lock
+
+*.egg
+.tox
+.venv
 .idea
+
+*.egg-info

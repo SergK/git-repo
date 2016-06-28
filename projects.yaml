@@ -27,10 +27,3 @@
   branches:
     - master
     - release-v1.2.1
-
-- project: kubernetes-helm
-  src-repo: https://github.com/kubernetes/helm
-  dst-repo: ssh://192.168.122.15:29418/kubernetes/helm
-  branches:
-    - master
-    - release-v1.2.1
