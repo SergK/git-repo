@@ -16,23 +16,8 @@
 #    with this program; if not, write to the Free Software Foundation, Inc.,
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import os
-import yaml
 
+from gitrepo.v1 import sync
 
-def exists(path):
-    """Checks if file is exist
-
-    :param str path: path to the file
-    :returns: True if file is exist, Flase if is not
-    """
-    return os.path.lexists(path)
-
-
-def parse_yaml(path):
-    """Parses yaml file
-
-    :param str path: path to the file
-    :returns: dict or list
-    """
-    return yaml.load(open(path))
+# Please keeps the list in alphabetical order
+__all__ = ('sync',)
