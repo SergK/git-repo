@@ -20,8 +20,8 @@ from cliff import argparse
 
 from gitrepo.commands import base
 from gitrepo import schemas
-from gitrepo import validator
 from gitrepo import utils
+from gitrepo import validator
 
 
 class GitSyncCommand(base.BaseCommand):

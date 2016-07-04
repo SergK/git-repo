@@ -23,7 +23,7 @@ import os
 import six
 
 
-# TODO: Add configuration file to remove some hard-coded code
+# TODO(skulanov): Add configuration file to remove some hard-coded code
 class GitSyncClient(object):
     """Provides high-level API to sync projects."""
 
