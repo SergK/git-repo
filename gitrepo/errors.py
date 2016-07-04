@@ -17,11 +17,11 @@
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
-class GitRepoSyncException(Exception):
+class GitRepoException(Exception):
     pass
 
 
-class ValidationError(GitRepoSyncException):
+class ValidationError(GitRepoException):
     pass
 
 
