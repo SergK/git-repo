@@ -32,18 +32,10 @@ class Application(app.App):
     configuration of basic engines.
     """
 
-    def build_option_parser(self, description, version, argparse_kwargs=None):
-        """Specifies global options."""
-        p_inst = super(Application, self)
-        parser = p_inst.build_option_parser(description=description,
-                                            version=version,
-                                            argparse_kwargs=argparse_kwargs)
-        return parser
-
     def configure_logging(self):
 
         logging.basicConfig(
-            level=logging.DEBUG,
+            level=logging.INFO,
             format="%(asctime)s  %(levelname)8s  %(message)s"
         )
 
@@ -71,7 +63,7 @@ def debug(name, cmd_class, argv=None):
     cmd_mgr = CommandManager("test_gitrepo", convert_underscores=True)
     cmd_mgr.add_command(name, cmd_class)
     return Application(
-        description="The utility manages packages and repositories.",
+        description="The utility for work with git projects.",
         version="0.0.1",
         command_manager=cmd_mgr
     ).run(argv)

@@ -25,7 +25,7 @@ from gitrepo import validator
 
 
 class GitSyncCommand(base.BaseCommand):
-    """Sync the projects command."""
+    """Sync the projects."""
 
     entity_name = 'sync'
 
@@ -40,14 +40,14 @@ class GitSyncCommand(base.BaseCommand):
         parser = super(GitSyncCommand, self).get_parser(prog_name)
         parser.add_argument("-f", "--force",
                             action="store_true",
-                            help="force push")
+                            help="Force push")
         parser.add_argument("path",
                             type=_projects_file,
                             metavar="file",
-                            help="path to mapping file in YAML format")
+                            help="Path to mapping file in YAML format")
         parser.add_argument("-p", "--project",
                             nargs='+',
-                            help="project to sync")
+                            help="Project to sync")
         return parser
 
     def take_action(self, parsed_args):
