@@ -31,14 +31,9 @@ class Application(app.App):
     """
 
     def configure_logging(self):
+        super(Application, self).configure_logging()
 
-        logging.basicConfig(
-            level=logging.INFO,
-            format="%(asctime)s  %(levelname)8s  %(message)s"
-        )
-
-        if logging.getLogger().getEffectiveLevel() <= logging.DEBUG:
-            git.cmd.Git.GIT_PYTHON_TRACE = True
+        git.cmd.Git.GIT_PYTHON_TRACE = True
 
 
 def main(argv=None):
