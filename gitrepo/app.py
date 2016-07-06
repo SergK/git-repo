@@ -15,7 +15,6 @@
 #    under the License.
 
 import git
-import logging
 
 from cliff import app
 from cliff.commandmanager import CommandManager
