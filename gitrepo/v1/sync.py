@@ -94,7 +94,8 @@ class GitSyncClient(object):
             "refs/remotes/origin/" + branch +
             ":" +
             "refs/heads/" + branch,
-            force=force
+            force=force,
+            tags=True
         )
         # Check for errors
         if push_infos:
