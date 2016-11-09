@@ -14,30 +14,19 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import abc
-
-from cliff import command
-import six
-
-import gitrepo
-
-VERSION = 'v1'
+import os
 
 
-@six.add_metaclass(abc.ABCMeta)
-class BaseCommand(command.Command):
-    """Super class for gitrepo commands."""
+class RepoBase(object):
 
-    def __init__(self, *args, **kwargs):
-        super(BaseCommand, self).__init__(*args, **kwargs)
-        self.client = gitrepo.get_client(self.entity_name, VERSION)
-
-    @abc.abstractproperty
-    def entity_name(self):
-        """Name of the gitrepo entity."""
-        pass
+    def __init__(self, repo_path, repo_name):
+        self._repo_path = repo_path
+        self._repo_name = repo_name
 
     @property
-    def stdout(self):
-        """Shortcut for self.app.stdout."""
-        return self.app.stdout
+    def repo_full_path(self):
+        return os.path.join(self._repo_path, self._repo_name)
+
+    @property
+    def repo_name(self):
+        return self._repo_name

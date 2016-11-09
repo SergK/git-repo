@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+#
 #    Copyright 2016 Mirantis, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -19,7 +19,7 @@ import logging
 import jsonschema
 import six
 
-from gitrepo import errors
+from gitrepo import error
 from gitrepo import utils
 
 
@@ -33,19 +33,19 @@ def validate_schema(data, schema, file_path, value_path=None):
     try:
         jsonschema.validate(data, schema)
     except jsonschema.exceptions.ValidationError as exc:
-        raise errors.ValidationError(
+        raise error.ValidationError(
             _make_error_message(exc, file_path, value_path))
 
 
 def validate_file_by_schema(schema, file_path):
     if not utils.file_exists(file_path):
-        raise errors.FileDoesNotExist(file_path)
+        raise error.FileDoesNotExist(file_path)
 
     data = utils.parse_yaml(file_path)
     if data is not None:
         validate_schema(data, schema, file_path)
     else:
-        raise errors.FileIsEmpty(file_path)
+        raise error.FileIsEmpty(file_path)
     return data
 
 

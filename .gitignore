@@ -5,6 +5,7 @@ dist
 lock
 
 *.egg
+.testrepository
 .tox
 .venv
 .idea

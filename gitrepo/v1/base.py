@@ -15,29 +15,13 @@
 #    under the License.
 
 import abc
-
-from cliff import command
 import six
-
-import gitrepo
-
-VERSION = 'v1'
 
 
 @six.add_metaclass(abc.ABCMeta)
-class BaseCommand(command.Command):
-    """Super class for gitrepo commands."""
-
-    def __init__(self, *args, **kwargs):
-        super(BaseCommand, self).__init__(*args, **kwargs)
-        self.client = gitrepo.get_client(self.entity_name, VERSION)
+class GitBaseClient(object):
 
     @abc.abstractproperty
-    def entity_name(self):
-        """Name of the gitrepo entity."""
+    def cache_dir(self):
+        """Directory to store local repositories."""
         pass
-
-    @property
-    def stdout(self):
-        """Shortcut for self.app.stdout."""
-        return self.app.stdout

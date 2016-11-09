@@ -33,7 +33,7 @@ gitrepo sync [-h] [-f] [-p PROJECT [PROJECT ...]] file
 Sync the projects.
 
 positional arguments:
-   file                 Path to mapping file in YAML format (see format bellow)
+   file                - Path to mapping file in YAML format (see format bellow)
 
 .. code-block:: yaml
 

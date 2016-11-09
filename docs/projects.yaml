@@ -1,24 +1,24 @@
 - project: kubernetes
   src-repo: https://github.com/kubernetes/kubernetes
-  dst-repo: ssh://127.0.0.1:29418/kubernetes/kubernetes
+  dst-repo: ssh://admin@127.0.0.1:29418/kubernetes/kubernetes
   branches:
     - "*"
 
 - project: kubernetes-dashboard
   src-repo: https://github.com/kubernetes/dashboard
-  dst-repo: ssh://127.0.0.1:29418/kubernetes/dashboard
+  dst-repo: ssh://admin@127.0.0.1:29418/kubernetes/dashboard
   branches:
     - master
 
 - project: kubernetes-features
   src-repo: https://github.com/kubernetes/features
-  dst-repo: ssh://127.0.0.1:29418/kubernetes/features
+  dst-repo: ssh://admin@127.0.0.1:29418/kubernetes/features
   branches:
     - master
 
 - project: kubernetes-helm
   src-repo: https://github.com/kubernetes/helm
-  dst-repo: ssh://127.0.0.1:29418/kubernetes/helm
+  dst-repo: ssh://admin@127.0.0.1:29418/kubernetes/helm
   branches:
     - master
     - release-v1.2.1

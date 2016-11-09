@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+#
 #    Copyright 2016 Mirantis, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -38,14 +38,14 @@ class GitSyncCommand(base.BaseCommand):
         parser = super(GitSyncCommand, self).get_parser(prog_name)
         parser.add_argument("-f", "--force",
                             action="store_true",
-                            help="Force push")
+                            help="Force push.")
         parser.add_argument("path",
                             type=_projects_file,
                             metavar="file",
-                            help="Path to mapping file in YAML format")
+                            help="Path to mapping file in YAML format.")
         parser.add_argument("-p", "--project",
                             nargs='+',
-                            help="Project to sync")
+                            help="Project(s) to sync.")
         return parser
 
     def take_action(self, parsed_args):
@@ -54,7 +54,7 @@ class GitSyncCommand(base.BaseCommand):
             parsed_args.path
         )
         self.client.sync(data, parsed_args.project, parsed_args.force)
-        self.app.stdout.write("Synchronization process completed\n")
+        self.app.stdout.write("====================\nCompleted...\n")
 
 
 def debug(argv=None):

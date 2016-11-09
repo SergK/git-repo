@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+#
 #    Copyright 2016 Mirantis, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -37,10 +37,10 @@ class Application(app.App):
 
 def main(argv=None):
     return Application(
-        description="The utility for work with git projects.",
+        description="The utility for work with git repositories.",
         version=gitrepo.__version__,
-        command_manager=CommandManager("gitrepo",
-                                       convert_underscores=True)
+        command_manager=CommandManager("gitrepo", convert_underscores=True),
+        deferred_help=True
     ).run(argv)
 
 
@@ -55,7 +55,7 @@ def debug(name, cmd_class, argv=None):
     cmd_mgr = CommandManager("test_gitrepo", convert_underscores=True)
     cmd_mgr.add_command(name, cmd_class)
     return Application(
-        description="The utility for work with git projects.",
-        version="0.0.1",
+        description="The utility for work with git repositories.",
+        version=gitrepo.__version__,
         command_manager=cmd_mgr
     ).run(argv)

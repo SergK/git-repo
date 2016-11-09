@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+#
 #    Copyright 2016 Mirantis, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -33,4 +33,4 @@ def parse_yaml(path):
     :param str path: path to the file
     :returns: dict or list
     """
-    return yaml.load(open(path))
+    return yaml.safe_load(open(path))

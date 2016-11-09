@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+#
 #    Copyright 2016 Mirantis, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -14,24 +14,5 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
-class GitRepoException(Exception):
-    pass
-
-
-class ValidationError(GitRepoException):
-    pass
-
-
-class FileIsEmpty(ValidationError):
-    def __init__(self, file_path):
-        super(FileIsEmpty, self).__init__(
-            "File '{0}' is empty".format(file_path)
-        )
-
-
-class FileDoesNotExist(ValidationError):
-    def __init__(self, file_path):
-        super(FileDoesNotExist, self).__init__(
-            "File '{0}' does not exist".format(file_path)
-        )
+from gitrepo.objects.base import RepoBase
+from gitrepo.objects.sync import RepoSync

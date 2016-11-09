@@ -14,30 +14,28 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import abc
 
-from cliff import command
-import six
-
-import gitrepo
-
-VERSION = 'v1'
+class GitRepoException(Exception):
+    """Base Exception for gitrepo."""
 
 
-@six.add_metaclass(abc.ABCMeta)
-class BaseCommand(command.Command):
-    """Super class for gitrepo commands."""
+class ArgumentException(GitRepoException):
+    """Must be raised when incorrect arguments inputted."""
 
-    def __init__(self, *args, **kwargs):
-        super(BaseCommand, self).__init__(*args, **kwargs)
-        self.client = gitrepo.get_client(self.entity_name, VERSION)
 
-    @abc.abstractproperty
-    def entity_name(self):
-        """Name of the gitrepo entity."""
-        pass
+class ValidationError(GitRepoException):
+    pass
 
-    @property
-    def stdout(self):
-        """Shortcut for self.app.stdout."""
-        return self.app.stdout
+
+class FileIsEmpty(ValidationError):
+    def __init__(self, file_path):
+        super(FileIsEmpty, self).__init__(
+            "File '{0}' is empty".format(file_path)
+        )
+
+
+class FileDoesNotExist(ValidationError):
+    def __init__(self, file_path):
+        super(FileDoesNotExist, self).__init__(
+            "File '{0}' does not exist".format(file_path)
+        )

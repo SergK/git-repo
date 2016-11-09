@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+#
 #    Copyright 2016 Mirantis, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -15,101 +15,82 @@
 #    under the License.
 
 import logging
+import os
 
 import git
-import os
-import six
+
+from gitrepo import error
+from gitrepo.objects.sync import RepoSync
+from gitrepo.v1 import base
 
 
-# TODO(skulanov): Add configuration file to remove some hard-coded code
-class GitSyncClient(object):
+class GitSyncClient(base.GitBaseClient):
     """Provides high-level API to sync projects."""
 
+    keys = ('project', 'src-repo', 'dst-repo', 'branches')
+
+    @property
+    def cache_dir(self):
+        return os.path.join(os.getenv("HOME", "/home/jenkins"),
+                            "gitrepo-sync-cache")
+
     def sync(self, data, projects=None, force=False):
+        """Sync specified projects from data.
+
+        If projects is None then all projects from data will be synced.
+         :param data: List of data description of projects
+         :type data: list
+         :param projects: List of string names of projects
+         :type projects: list
+         :param force: Forces update remote repository without any checks
+         :type force: bool
+         """
+
         if projects is not None:
-            projects = self._filter_projects(data, projects)
+            projects = self.filter_projects(data, projects)
 
         projects = projects or data
 
         for project in projects:
+            name, src, dst, branches = [project.get(k) for k in self.keys]
+            logging.info("==== Synchronizing '{0}' ====".format(name))
             try:
-                logging.info("Synchronizing `{0}`".format(project['project']))
-                self._get_src_repo(project)
-                self._setup_dst_repo(project)
-                for branch in project['branches']:
-                    self._push_branch(project, branch, force)
-            except Exception as e:
-                logging.error("Unable to sync '{0}': {1}".format(
-                    project['project'],
-                    str(e))
-                )
+                repo_obj = RepoSync(src, self.cache_dir, name)
+                repo_obj.setup_remote_dst_repo(dst)
+                for branch in project.get('branches'):
+                    repo_obj.push_branch(branch, force=force)
+            except git.exc.GitCommandError as e:
+                logging.error("Unable to sync '{0}': {1}".format(name, str(e)))
 
     @staticmethod
-    def _filter_projects(data, projects):
+    def filter_projects(data, projects):
+        """Get specified projects from data.
+
+         :param data: List of data description of projects
+         :type data: list
+         :param projects: List of all projects from data
+         :type projects: list
+         :return: List of specified projects from data
+         :rtype: list
+         """
+
         filtered_projects = []
         for project in projects:
-            filtered_projects.extend(
-                filter(lambda p: p['project'] == project, data)
-            )
+            for item_data in data:
+                if project == item_data['project']:
+                    filtered_projects.append(item_data)
+                    break
+            else:
+                log_msg = ("Input data for project '{}' "
+                           "was not found ".format(project))
+                logging.error(log_msg)
+
+        if not filtered_projects:
+            msg = ("Input data for projects {} were "
+                   "not found".format(', '.join(projects)))
+            raise error.ArgumentException(msg)
+
         return filtered_projects
-
-    def _get_src_repo(self, project):
-        # Clone or update cached repository
-        cache_dir = os.path.join(
-            os.getenv("HOME", "/home/jenkins"),
-            "gitrepo-sync-cache", project['project']
-        )
-        try:
-            self.repo = git.Repo(cache_dir)
-            self.repo.git.reset('--hard')
-            self.repo.git.clean('-xdfq')
-            self.repo.remote("origin").update()
-        except git.exc.NoSuchPathError as e:
-            logging.info(e)
-            self.repo = git.Repo.clone_from(project['src-repo'], cache_dir)
-
-    def _setup_dst_repo(self, project):
-        # Add "dst" repository as remote
-        if project['dst-repo'].startswith("ssh://"):
-            dst_repo_list = list(
-                six.moves.urllib.parse.urlsplit(
-                    project['dst-repo']
-                )
-            )
-            username = os.getenv("GIT_PUSH_USERNAME", "admin")
-            dst_repo_list[1] = username + "@" + dst_repo_list[1]
-            dst_repo = six.moves.urllib.parse.urlunsplit(dst_repo_list)
-        else:
-            dst_repo = project['dst-repo']
-
-        try:
-            self.repo.delete_remote("dst")
-        except git.exc.GitCommandError as e:
-            logging.debug(e)
-
-        self.repo.create_remote("dst", dst_repo)
-
-    def _push_branch(self, project, branch, force=False):
-        push_infos = self.repo.remote("dst").push(
-            "refs/remotes/origin/" + branch +
-            ":" +
-            "refs/heads/" + branch,
-            force=force,
-            tags=True
-        )
-        # Check for errors
-        if push_infos:
-            for push_info in push_infos:
-                if push_info.flags & push_info.ERROR:
-                    logging.error(
-                        "Push failed for project `{0}`: {1}".format(
-                            project['project'], push_info.summary
-                        )
-                    )
-        else:
-            logging.error("Push failed for project `{0}`".format(
-                project['project'])
-            )
 
 
 def get_client():
