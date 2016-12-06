@@ -30,9 +30,24 @@ class Application(app.App):
     """
 
     def configure_logging(self):
+        # Redefine cliff's default logging message format by adding threadName
+        # tag to identify logs from multiple threads
+        self.CONSOLE_MESSAGE_FORMAT = ('[%(threadName)s] : '
+                                       '%(levelname)-8s '
+                                       '%(message)s')
+        self.LOG_FILE_MESSAGE_FORMAT = ('[%(threadName)s] '
+                                        '[%(asctime)s] '
+                                        '%(levelname)-8s '
+                                        '%(name)s '
+                                        '%(message)s')
         super(Application, self).configure_logging()
 
-        git.cmd.Git.GIT_PYTHON_TRACE = True
+        # Enables debugging of GitPython's git commands
+        # depending on verbosity level
+        git.cmd.Git.GIT_PYTHON_TRACE = {0: False,  # '-q'
+                                        1: True,   # default level
+                                        2: 'full'  # '-v'
+                                        }.get(self.options.verbose_level, True)
 
 
 def main(argv=None):

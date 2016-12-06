@@ -46,6 +46,10 @@ class GitSyncCommand(base.BaseCommand):
         parser.add_argument("-p", "--project",
                             nargs='+',
                             help="Project(s) to sync.")
+        parser.add_argument("-t", "--num-threads",
+                            type=int,
+                            default=1,
+                            help="Number of threads.")
         return parser
 
     def take_action(self, parsed_args):
@@ -53,7 +57,10 @@ class GitSyncCommand(base.BaseCommand):
             schemas.PROJECTS_SCHEMA,
             parsed_args.path
         )
-        self.client.sync(data, parsed_args.project, parsed_args.force)
+        self.client.sync(data,
+                         parsed_args.project,
+                         parsed_args.force,
+                         parsed_args.num_threads)
         self.app.stdout.write("====================\nCompleted...\n")
 
 

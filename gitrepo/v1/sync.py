@@ -15,7 +15,11 @@
 #    under the License.
 
 import logging
+import multiprocessing
 import os
+
+from functools import partial
+from multiprocessing.dummy import Pool as ThreadPool
 
 import git
 
@@ -34,8 +38,8 @@ class GitSyncClient(base.GitBaseClient):
         return os.path.join(os.getenv("HOME", "/home/jenkins"),
                             "gitrepo-sync-cache")
 
-    def sync(self, data, projects=None, force=False):
-        """Sync specified projects from data.
+    def sync(self, data, projects=None, force=False, num_threads=1):
+        """Sync specified projects from data. Supports multiple worker threads
 
         If projects is None then all projects from data will be synced.
          :param data: List of data description of projects
@@ -44,6 +48,8 @@ class GitSyncClient(base.GitBaseClient):
          :type projects: list
          :param force: Forces update remote repository without any checks
          :type force: bool
+         :param num_threads: Number of worker threads
+         :type num_threads: int
          """
 
         if projects is not None:
@@ -51,16 +57,33 @@ class GitSyncClient(base.GitBaseClient):
 
         projects = projects or data
 
-        for project in projects:
-            name, src, dst, branches = [project.get(k) for k in self.keys]
-            logging.info("==== Synchronizing '{0}' ====".format(name))
-            try:
-                repo_obj = RepoSync(src, self.cache_dir, name)
-                repo_obj.setup_remote_dst_repo(dst)
-                for branch in project.get('branches'):
-                    repo_obj.push_branch(branch, force=force)
-            except git.exc.GitCommandError as e:
-                logging.error("Unable to sync '{0}': {1}".format(name, str(e)))
+        partial_sync_single = partial(self.sync_single, force=force)
+
+        pool = ThreadPool(num_threads)
+        pool.map(partial_sync_single, projects)
+        pool.close()
+        pool.join()
+
+    def sync_single(self, project, force=False):
+        """Sync single project.
+
+        :param project: Dict of data description of project
+        :type project: dict
+        :param force: Forces update remote repository without any checks
+        :type force: bool
+        """
+
+        name, src, dst, branches = [project.get(k) for k in self.keys]
+        # Set worker thread name based on repo project one
+        multiprocessing.dummy.current_process().name = name
+        logging.info("==== Synchronizing '{0}' ====".format(name))
+        try:
+            repo_obj = RepoSync(src, self.cache_dir, name)
+            repo_obj.setup_remote_dst_repo(dst)
+            for branch in project.get('branches'):
+                repo_obj.push_branch(branch, force=force)
+        except git.exc.GitCommandError as e:
+            logging.error("Unable to sync '{0}': {1}".format(name, str(e)))
 
     @staticmethod
     def filter_projects(data, projects):
@@ -86,8 +109,7 @@ class GitSyncClient(base.GitBaseClient):
                 logging.error(log_msg)
 
         if not filtered_projects:
-            msg = ("Input data for projects {} were "
-                   "not found".format(', '.join(projects)))
+            msg = "Nothing to do. No projects were found."
             raise error.ArgumentException(msg)
 
         return filtered_projects

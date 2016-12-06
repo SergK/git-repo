@@ -28,12 +28,12 @@ Commands:
 'gitrepo sync' example
 ----------------------
 
-gitrepo sync [-h] [-f] [-p PROJECT [PROJECT ...]] file
+**gitrepo sync [-h] [-f] [-p PROJECT [PROJECT ...]] [-t NUM_THREADS] file**
 
 Sync the projects.
 
 positional arguments:
-   file                - Path to mapping file in YAML format (see format bellow)
+   file                - Path to projects mapping file in YAML format (see format bellow)
 
 .. code-block:: yaml
 
@@ -45,17 +45,16 @@ positional arguments:
 
 optional arguments:
    -h, --help           Show help message and exit
-   -f, --force          Force push
-   -p, --project        Project to sync
+   -f, --force          Force update remote repository without any checks
+   -p, --project        Project(s) to sync
+   -t, --num-thread     Number of worker threads (1 by default)
 
 
 ToDo
 ----
 * add additional commands;
-* add ability allow to customise push user per each repo;
-* add multithreading;
 * add ability to customise connection parameters;
-* add unit tests;
+* add more unit tests;
 
 
 Contributors
