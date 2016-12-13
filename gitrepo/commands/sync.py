@@ -27,6 +27,10 @@ class GitSyncCommand(base.BaseCommand):
 
     entity_name = 'sync'
 
+    @staticmethod
+    def unpack_results(project):
+        return ''.join([': '.join((k, v[1])) for k, v in project.items()])
+
     def get_parser(self, prog_name):
 
         def _projects_file(path):
@@ -57,15 +61,26 @@ class GitSyncCommand(base.BaseCommand):
             schemas.PROJECTS_SCHEMA,
             parsed_args.path
         )
-        self.client.sync(data,
-                         parsed_args.project,
-                         parsed_args.force,
-                         parsed_args.num_threads)
-        self.app.stdout.write("====================\nCompleted...\n")
+        result = self.client.sync(data,
+                                  parsed_args.project,
+                                  parsed_args.force,
+                                  parsed_args.num_threads)
+        total = len(result)
+        passed = sum([v.values()[0][0] for v in result])
+        failed_projects = [i for i in result if not i.values()[0][0]]
+        failed_msg = '\n'.join(map(self.unpack_results, failed_projects))
+        self.app.stdout.write("====================\nCompleted...\n\n")
+        self.app.stdout.write("TOTAL: {0}\n"
+                              "  Successfully synced: {1}\n"
+                              "  Synced FAILED: {2}\n-----\n{3}\n"
+                              "".format(total,
+                                        passed,
+                                        total - passed,
+                                        failed_msg))
 
 
 def debug(argv=None):
-    """Helper to debug the Build command."""
+    """Helper to debug the Sync command."""
     from gitrepo.app import debug
     debug("sync", GitSyncCommand, argv)
 

@@ -45,7 +45,17 @@ class RepoSync(RepoBase):
         self.repo.create_remote(dst_name, dst_url)
 
     def push_branch(self, branch, dst_name="dst", force=False):
-        """Push changes from source branch to target one."""
+        """Push changes from source branch to target one.
+
+        :param branch: branch for pushing
+        :type branch: str
+        :param dst_name: destination repo name
+        :type dst_name: str
+        :param force: Forces update remote repo without any checks
+        :type force: bool
+        :return: success result as a tuple (True/False, err_msg)
+        :rtype: tuple
+        """
 
         push_infos = self.repo.remote(dst_name).push(
             "refs/remotes/origin/" + branch +
@@ -58,9 +68,13 @@ class RepoSync(RepoBase):
         if push_infos:
             for push_info in push_infos:
                 if push_info.flags & push_info.ERROR:
-                    logging.error(
-                        "Push failed for project '{0}': {1}".format(
-                            self.repo_name, push_info.summary))
+                    err_msg = ("Push failed for project '{0}': "
+                               "{1}".format(self.repo_name, push_info.summary))
+                    logging.error(err_msg)
+                    return False, err_msg
         else:
-            logging.error("Push failed for project `{0}`".format(
-                self.repo_name))
+            err_msg = "Push failed for project `{0}`".format(self.repo_name)
+            logging.error(err_msg)
+            return False, err_msg
+        # if push was successful then error message is empty
+        return True, ''

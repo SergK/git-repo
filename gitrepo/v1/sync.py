@@ -50,6 +50,8 @@ class GitSyncClient(base.GitBaseClient):
          :type force: bool
          :param num_threads: Number of worker threads
          :type num_threads: int
+         :return: list of sync results
+         :rtype: list
          """
 
         if projects is not None:
@@ -60,9 +62,10 @@ class GitSyncClient(base.GitBaseClient):
         partial_sync_single = partial(self.sync_single, force=force)
 
         pool = ThreadPool(num_threads)
-        pool.map(partial_sync_single, projects)
+        results = pool.map(partial_sync_single, projects)
         pool.close()
         pool.join()
+        return results
 
     def sync_single(self, project, force=False):
         """Sync single project.
@@ -71,8 +74,11 @@ class GitSyncClient(base.GitBaseClient):
         :type project: dict
         :param force: Forces update remote repository without any checks
         :type force: bool
+        :return: sync result as a dict {'project_name': (True/False, err_msg)}
+        :rtype: dict
         """
 
+        result, err_msg = False, ''
         name, src, dst, branches = [project.get(k) for k in self.keys]
         # Set worker thread name based on repo project one
         multiprocessing.dummy.current_process().name = name
@@ -80,10 +86,14 @@ class GitSyncClient(base.GitBaseClient):
         try:
             repo_obj = RepoSync(src, self.cache_dir, name)
             repo_obj.setup_remote_dst_repo(dst)
-            for branch in project.get('branches'):
-                repo_obj.push_branch(branch, force=force)
+            for branch in branches:
+                result, err_msg = repo_obj.push_branch(branch, force=force)
+                if not result:
+                    break
         except git.exc.GitCommandError as e:
-            logging.error("Unable to sync '{0}': {1}".format(name, str(e)))
+            err_msg = "Unable to sync '{0}': {1}".format(name, str(e))
+            logging.error(err_msg)
+        return {name: (result, err_msg)}
 
     @staticmethod
     def filter_projects(data, projects):
