@@ -14,6 +14,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import junit_xml
+
 from cliff import argparse
 
 from gitrepo.commands import base
@@ -30,6 +32,20 @@ class GitSyncCommand(base.BaseCommand):
     @staticmethod
     def unpack_results(project):
         return ''.join([': '.join((k, v[1])) for k, v in project.items()])
+
+    @staticmethod
+    def create_junit_xml_file(projects, xml_file_path):
+        """Create JUnit XML report file that can be used in Jenkins."""
+
+        synced_projects = []
+        for project in projects:
+            for k, v in project.items():
+                tc = junit_xml.TestCase(k)
+                tc.add_error_info(message=v[1])
+                synced_projects.append(tc)
+        ts = junit_xml.TestSuite("Sync", synced_projects)
+        with open(xml_file_path, 'w') as f:
+            junit_xml.TestSuite.to_file(f, [ts])
 
     def get_parser(self, prog_name):
 
@@ -54,6 +70,11 @@ class GitSyncCommand(base.BaseCommand):
                             type=int,
                             default=1,
                             help="Number of threads.")
+        parser.add_argument("--junit-xml",
+                            nargs='?',
+                            metavar='XML_FILE',
+                            const='result.xml',
+                            help="Create JUnit XML file.")
         return parser
 
     def take_action(self, parsed_args):
@@ -77,6 +98,8 @@ class GitSyncCommand(base.BaseCommand):
                                         passed,
                                         total - passed,
                                         failed_msg))
+        if parsed_args.junit_xml:
+            self.create_junit_xml_file(result, parsed_args.junit_xml)
 
 
 def debug(argv=None):

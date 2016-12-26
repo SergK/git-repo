@@ -78,7 +78,7 @@ class GitSyncClient(base.GitBaseClient):
         :rtype: dict
         """
 
-        result, err_msg = False, ''
+        result, err_msg = False, None
         name, src, dst, branches = [project.get(k) for k in self.keys]
         # Set worker thread name based on repo project one
         multiprocessing.dummy.current_process().name = name
