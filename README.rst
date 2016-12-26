@@ -28,7 +28,7 @@ Commands:
 'gitrepo sync' example
 ----------------------
 
-**gitrepo sync [-h] [-f] [-p PROJECT [PROJECT ...]] [-t NUM_THREADS] file**
+**gitrepo sync [-h] [-f] [-p PROJECT [PROJECT ...]] [-t NUM_THREADS] [--junit-xml [XML_FILE]] file**
 
 Sync the projects.
 
@@ -39,7 +39,7 @@ positional arguments:
 
     - project: kubernetes
       src-repo: https://github.com/kubernetes/kubernetes
-      dst-repo: ssh://127.0.0.1:29418/kubernetes/kubernetes
+      dst-repo: ssh://admin@127.0.0.1:29418/kubernetes/kubernetes
       branches:
         - "*"
 
@@ -48,6 +48,7 @@ optional arguments:
    -f, --force          Force update remote repository without any checks
    -p, --project        Project(s) to sync
    -t, --num-thread     Number of worker threads (1 by default)
+   --junit-xml          Create sync report in JUnit XML format (can be used in Jenkins)
 
 
 ToDo
