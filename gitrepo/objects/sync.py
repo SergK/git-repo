@@ -60,7 +60,7 @@ class RepoSync(RepoBase):
         push_infos = self.repo.remote(dst_name).push(
             "refs/remotes/origin/" + branch +
             ":" +
-            "refs/heads/" + branch,
+            "refs/for/" + branch + "%submit",
             force=force,
             tags=True
         )
