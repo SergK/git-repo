@@ -16,7 +16,7 @@
 
 import junit_xml
 
-from cliff import argparse
+import argparse
 
 from gitrepo.commands import base
 from gitrepo import schemas
