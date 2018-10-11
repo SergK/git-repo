@@ -62,7 +62,7 @@ class RepoSync(RepoBase):
             ":" +
             "refs/for/" + branch + "%submit",
             force=force,
-            tags=True
+            tags=False
         )
         # Check for errors
         if push_infos:
